@@ -1,86 +1,71 @@
-# Dictionary to store account details
-accounts = {
-    'ramu': {'pin': 123, 'balance': 1000},
-    'gayatri': {'pin': 456, 'balance': 5000},
-    'roja': {'pin': 789, 'balance': 1500}
-}
+import os
+import json
 
-# Function to check if login is successful
-def login(name, pin):
-    if name in accounts and accounts[name]['pin'] == pin:
-        return True
-    else:
-        return False
+# Define file to store user data
+DATA_FILE = "atm_data.json"
 
-# Function to deposit money
-def deposit(name, amount):
-    if amount > 0:
-        accounts[name]['balance'] += amount
-        print(f"deposited successfully\nyour current balance is: {accounts[name]['balance']}")
-    else:
-        print("Invalid deposit amount.")
+# Function to load account data
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as file:
+            return json.load(file)
+    return {"balance": 0}  # Default data if file doesn't exist
 
-# Function to withdraw money
-def withdraw(name, amount):
-    if amount > 0 and amount <= accounts[name]['balance']:
-        accounts[name]['balance'] -= amount
-        print(f"withdrawn successfully\nyour current balance is: {accounts[name]['balance']}")
-    elif amount > accounts[name]['balance']:
-        print("Insufficient balance.")
-    else:
-        print("Invalid withdrawal amount.")
+# Function to save account data
+def save_data(data):
+    with open(DATA_FILE, "w") as file:
+        json.dump(data, file)
 
-# Function to check balance
-def check_balance(name):
-    print(f"Your current balance is: {accounts[name]['balance']}")
-
-# Main ATM Interface
-def atm():
-    print("Welcome to the ATM!")
+# ATM Simulator
+def atm_simulator():
+    account_data = load_data()
     
-    name = input("Enter your account name: ")
-    pin = int(input("Enter your pin: "))
+    print("Welcome to the ATM")
     
-    # Login check
-    if login(name, pin):
-        print("Login successful!")
+    while True:
+        print("\nMenu:")
+        print("1. Check Balance")
+        print("2. Deposit Money")
+        print("3. Withdraw Money")
+        print("4. Exit")
         
-        while True:
-            print("\nChoose an option:")
-            print("1. Deposit")
-            print("2. Withdraw")
-            print("3. Check Balance")
-            print("4. Exit")
-            
-            choice = input("Enter your choice: ")
-            
-            if choice == '1':
+        choice = input("Enter your choice (1-4): ")
+        
+        if choice == "1":
+            print(f"Your current balance is: {account_data['balance']}")
+        
+        elif choice == "2":
+            try:
                 amount = float(input("Enter amount to deposit: "))
-                deposit(name, amount)
-                break
-               
-            
-            elif choice == '2':
+                if amount > 0:
+                    account_data['balance'] += amount
+                    print(f"{amount} deposited successfully.")
+                else:
+                    print("Deposit amount must be positive.")
+            except ValueError:
+                print("Invalid input. Please enter a valid number.")
+        
+        elif choice == "3":
+            try:
                 amount = float(input("Enter amount to withdraw: "))
-                withdraw(name, amount)
-                break
-               
-                
-            elif choice == '3':
-                check_balance(name)
-                break
-               
-                
-            elif choice == '4':
-                print("Thank you for using the ATM!")
-                break
-                
-            else:
-                print("Invalid choice. Please try again.")
-                
-    else:
-        print("Invalid account name or pin.")
-        atm()
+                if 0 < amount <= account_data['balance']:
+                    account_data['balance'] -= amount
+                    print(f"{amount} withdrawn successfully.")
+                elif amount > account_data['balance']:
+                    print("Insufficient funds.")
+                else:
+                    print("Withdrawal amount must be positive.")
+            except ValueError:
+                print("Invalid input. Please enter a valid number.")
+        
+        elif choice == "4":
+            save_data(account_data)
+            print("Thank you for using the ATM")
+            break
+        
+        else:
+            print("Invalid choice. Please select a valid option.")
 
-# Run the ATM
-atm()
+# Run the ATM Simulator
+if __name__ == "__main__":
+    atm_simulator()
